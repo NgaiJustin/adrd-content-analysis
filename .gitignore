@@ -159,3 +159,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 .DS_Store
+
+# Some data files that are too large
+src/data/all-the-news.csv
+src/data/kaggle-20-22.csv
