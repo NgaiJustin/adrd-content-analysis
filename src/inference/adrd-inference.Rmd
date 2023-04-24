@@ -1,0 +1,133 @@
+---
+title: "adrd-content-analysis"
+author: "Justin Ngai"
+date: "2023-04-24"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Libraries
+
+```{r cars}
+library(readxl)
+library(tidyverse, quietly = T)
+library(readr)
+```
+
+## Load and Process Tagged Data
+
+Load the tagged data and filter our irrelevant entries
+
+```{r pressure, echo=FALSE}
+en_news    <- read_excel("../tagged/relevant_en_news_tagged.xlsx")
+ch_news    <- read_excel("../tagged/relevant_ch_news_tagged.xlsx")
+en_tweets  <- read_excel("../tagged/relevant_tweets_tagged.xlsx")
+ch_weibo   <- read_excel("../tagged/relevant_weibo_tagged.xlsx")
+
+features = c("biological", "structural", "cultural", "behavioral", "medical", "policy", "prevent", "intervene", "attitude", "family")
+
+en_news = en_news[features]
+ch_news = ch_news[features]
+en_tweets = en_tweets[features]
+ch_weibo = ch_weibo[features]
+
+en_news = na.omit(en_news)
+ch_news = na.omit(ch_news)
+en_tweets = na.omit(en_tweets)
+ch_weibo = na.omit(ch_weibo)
+
+
+en_news <- en_news %>%  mutate(attitude=recode(attitude, `1`="Optimistic", `0`="Pessimistic", `0.5`="Neutral"))
+ch_news <- ch_news %>%  mutate(attitude=recode(attitude, `1`="Optimistic", `0`="Pessimistic", `0.5`="Neutral"))
+en_tweets <- en_tweets %>%  mutate(attitude=recode(attitude, `1`="Optimistic", `0`="Pessimistic", `0.5`="Neutral"))
+ch_weibo <- ch_weibo %>%  mutate(attitude=recode(attitude, `1`="Optimistic", `0`="Pessimistic", `0.5`="Neutral"))
+```
+
+# Data Analysis
+## Specific Cause
+
+```{r}
+en_biological = sum(en_news$biological) + sum(en_tweets$biological)
+en_structural = sum(en_news$structural) + sum(en_tweets$structural)
+en_cultural = sum(en_news$cultural) + sum(en_tweets$cultural)
+en_total = en_biological + en_structural + en_cultural
+
+ch_biological = sum(ch_news$biological) + sum(ch_weibo$biological)
+ch_structural = sum(ch_news$structural) + sum(ch_weibo$structural)
+ch_cultural = sum(ch_news$cultural) + sum(ch_weibo$cultural)
+ch_total = ch_biological + ch_structural + ch_cultural
+```
+
+## Specific Solutions
+
+```{r}
+en_behavioral = sum(en_news$behavioral) + sum(en_tweets$behavioral)
+en_medical = sum(en_news$medical) + sum(en_tweets$medical)
+en_policy = sum(en_news$policy) + sum(en_tweets$policy)
+en_total = en_behavioral + en_medical + en_policy
+
+ch_behavioral = sum(ch_news$behavioral) + sum(ch_weibo$behavioral)
+ch_medical = sum(ch_news$medical) + sum(ch_weibo$medical)
+ch_policy = sum(ch_news$policy) + sum(ch_weibo$policy)
+ch_total = ch_behavioral + ch_medical + ch_policy
+
+ch_medical / ch_total
+
+```
+
+## Prevention vs Intervention
+
+```{r}
+en_p = sum(en_news$prevent) + sum(en_tweets$prevent)
+en_i = sum(en_news$prevent) + sum(en_tweets$intervene)
+en_total = en_p + en_i
+
+ch_p = sum(ch_news$prevent) + sum(ch_weibo$prevent)
+ch_i = sum(ch_news$intervene) + sum(ch_weibo$intervene)
+ch_total = ch_p + ch_i
+
+ch_p / ch_total
+
+```
+
+
+## Tone
+
+```{r}
+en_news %>% count(attitude)
+en_tweets %>% count(attitude)
+ch_news %>% count(attitude)
+ch_weibo %>%count(attitude)
+```
+
+
+## Familial Emphasis
+
+```{r}
+en_news %>% count(family)
+en_tweets %>% count(family)
+ch_news %>% count(family)
+ch_weibo %>% count(family)
+```
+## Attitude under Familial Emphasis
+
+```{r}
+en_news %>% count(family, attitude)
+en_tweets %>% count(family, attitude)
+ch_news %>% count(family, attitude)
+ch_weibo %>% count(family, attitude)
+```
+
+## Resolution Ideologies by Familial Emphasis
+
+```{r}
+en_news %>% count(family, prevent, intervene)
+en_tweets %>% count(family, prevent, intervene)
+ch_news %>% count(family, prevent, intervene)
+ch_weibo %>% count(family, prevent, intervene)
+```
+
+
